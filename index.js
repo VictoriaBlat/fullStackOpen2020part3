@@ -40,10 +40,35 @@ app.delete("/api/persons/:id", (req, res) => {
 });
 
 app.post("/api/persons/", (req, res) => {
-  let maxId =
-    persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
-  const person = req.body;
-  person.id = Math.floor(Math.random() * (1000000 - maxId) + maxId);
+  const genID = () => {
+    let maxId =
+      persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
+    return maxId;
+  };
+  const body = req.body;
+
+  // if (!body.name || !body.number)
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({
+      error: "name or number missing",
+    });
+  } else if (
+    persons.map((person) => {
+      person.name === body.name;
+    })
+  ) {
+    return res.status(400).json({
+      error: "name must be unique",
+    });
+  }
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: genID(),
+  };
+
+  // person.id = Math.floor(Math.random() * (1000000 - maxId) + maxId);
   persons.concat(person);
   res.json(person);
 });
