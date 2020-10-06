@@ -39,6 +39,15 @@ app.delete("/api/persons/:id", (req, res) => {
   res.status(204).end();
 });
 
+app.post("/api/persons/", (req, res) => {
+  let maxId =
+    persons.length > 0 ? Math.max(...persons.map((person) => person.id)) : 0;
+  const person = req.body;
+  person.id = Math.floor(Math.random() * (1000000 - maxId) + maxId);
+  persons.concat(person);
+  res.json(person);
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
