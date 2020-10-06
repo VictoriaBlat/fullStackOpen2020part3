@@ -2,10 +2,17 @@ const { response } = require("express");
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
-// morgan("tiny");
-app.use(morgan("tiny"));
+// app.use(morgan("tiny"));
 app.use(express.json());
 
+morgan.token("returnBody", function getId(req) {
+  return JSON.stringify(req.body);
+});
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :returnBody"
+  )
+);
 let persons = [
   { id: 1, name: "Arto Hellas", number: "040-123456" },
   { id: 2, name: "Ada Lovelace", number: "39-44-5323523" },
@@ -49,18 +56,18 @@ app.post("/api/persons/", (req, res) => {
     return maxId;
   };
   const body = req.body;
-
+  let notUnique = persons.find((person) => {
+    if (person.name === body.name) {
+      return true;
+    }
+  });
+  // let isUnique = true;
   // if (!body.name || !body.number)
-
   if (!body.name || !body.number) {
     return res.status(400).json({
       error: "name or number missing",
     });
-  } else if (
-    persons.map((person) => {
-      person.name === body.name;
-    })
-  ) {
+  } else if (notUnique) {
     return res.status(400).json({
       error: "name must be unique",
     });
@@ -70,7 +77,7 @@ app.post("/api/persons/", (req, res) => {
     number: body.number,
     id: genID(),
   };
-
+  console.log("body.name", typeof body.name);
   // person.id = Math.floor(Math.random() * (1000000 - maxId) + maxId);
   persons.concat(person);
   res.json(person);
